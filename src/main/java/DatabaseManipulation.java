@@ -157,9 +157,7 @@ public class DatabaseManipulation implements DataManipulation {
             result = preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            //closeConnection();
+            //e.printStackTrace(); //todo 重复性约束？
         }
         return result;
     }
@@ -254,7 +252,7 @@ public class DatabaseManipulation implements DataManipulation {
             result = preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } finally {
             //closeConnection();
         }
@@ -286,24 +284,72 @@ public class DatabaseManipulation implements DataManipulation {
     public int addAffiliation(String str) {
         //getConnection();
         int result = 0;
-        String sql = "insert into affiliation (id, affiliation) " +
-                "values (?,?)";
+        String sql = "insert into affiliations (affiliation) " +
+                "values (?)";
         String Info[] = str.split(";");
         try {
             PreparedStatement preparedStatement = con.prepareStatement(sql);
-            preparedStatement.setInt(1, Integer.parseInt(Info[0]));
-            preparedStatement.setString(2, Info[1]);
+            preparedStatement.setString(1, Info[0]);
             //System.out.println(preparedStatement.toString());
             result = preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            //closeConnection();
         }
         return result;
     }
+    //insert into author_affiliations (author_id, affiliation_id)
+    public int add_author_affiliations(String lastName,String affiliation) {
+        //getConnection();
+        int result = 0;
+        String sql = "insert into author_affiliations (author_id, affiliation_id) " +
+                "values (?,?)";
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setInt(1, getAuthorId(lastName));
+            preparedStatement.setInt(2, getAffiliationId(affiliation));
+            //System.out.println(preparedStatement.toString());
+            result = preparedStatement.executeUpdate();
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    public int getAuthorId(String lastName){
+        Statement stmt = null;
+        int id=-1;
+        String sql = "select id from authors where last_name ='"+lastName+"'";
+        try {
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+                id = rs.getInt("id");
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return id;
+    }
+    public int getAffiliationId(String affiliation){
+        Statement stmt = null;
+        int id=-1;
+        String sql = "select id from affiliations where affiliation = '"+affiliation+"'";
+        try {
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+                id = rs.getInt("id");
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return id;
+    }
     @Override
     public String allContinentNames() {
         //getConnection();
@@ -376,7 +422,7 @@ public class DatabaseManipulation implements DataManipulation {
 
     @Override
     public String findMovieById(int id) {
-        // add your code here...
+
         return null;
     }
 

@@ -24,4 +24,7 @@ public interface DataManipulation {
     public void addAll(String addOneArticle_str, Date date_created, Date date_completed, String addJournals_str,String JournalIssue_str);
     public void getConnection();
     public void closeConnection();
+    public int add_author_affiliations(String lastName,String affiliation);
+    public int getAuthorId(String lastName);
+    public int getAffiliationId(String affiliation);
 }

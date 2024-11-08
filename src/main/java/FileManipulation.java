@@ -206,4 +206,19 @@ public class FileManipulation implements DataManipulation {
     public void closeConnection() {
 
     }
+
+    @Override
+    public int add_author_affiliations(String lastName, String affiliation) {
+        return 0;
+    }
+
+    @Override
+    public int getAuthorId(String lastName) {
+        return 0;
+    }
+
+    @Override
+    public int getAffiliationId(String affiliation) {
+        return 0;
+    }
 }
