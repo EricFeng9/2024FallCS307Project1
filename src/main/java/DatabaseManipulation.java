@@ -12,7 +12,7 @@ public class DatabaseManipulation implements DataManipulation {
     private String port = "5432";
 
 
-    private void getConnection() {
+    public void getConnection() {
         try {
             Class.forName("org.postgresql.Driver");
 
@@ -33,7 +33,7 @@ public class DatabaseManipulation implements DataManipulation {
     }
 
 
-    private void closeConnection() {
+    public void closeConnection() {
         if (con != null) {
             try {
                 con.close();
@@ -45,8 +45,76 @@ public class DatabaseManipulation implements DataManipulation {
     }
 
     @Override
+    public void addAll(String addOneArticle_str, Date date_created, Date date_completed, String addJournals_str, String JournalIssue_str) {
+        //getConnection();
+        int addOneArticle_result = addOneArticle(addOneArticle_str,date_created,date_completed);
+        int addJournals_result = addJournals(addJournals_str);
+        int addJournalIssue_result = addJournalIssue(addJournals_str);
+        //closeConnection();
+    }
+    public int addJournalIssue(String str){
+        int result = 0;
+        String sql = "insert into journal_issues (journal_id, volume, issue) " +
+                "values (?,?,?)";
+        String Info[] = str.split(";");
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1, Info[0]);
+            preparedStatement.setString(2, Info[1]);
+            preparedStatement.setString(3, Info[2]);
+            //System.out.println(preparedStatement.toString());
+            result = preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            //e.printStackTrace();
+            //重复插入会有报错，直接注释掉了
+        }
+        return result;
+    }
+    public int addJournals(String str){
+
+        int result = 0;
+        String sql = "insert into journals (id, country, title, issn) " +
+                "values (?,?,?,?)";
+        String Info[] = str.split(";");
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1, Info[0]);
+            preparedStatement.setString(2, Info[1]);
+            preparedStatement.setString(3, Info[2]);
+            preparedStatement.setString(4, Info[3]);
+            //System.out.println(preparedStatement.toString());
+            result = preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            //e.printStackTrace();
+            //重复插入会有报错，直接注释掉了
+        }
+        return result;
+    }
+    public int addOneArticle(String str, Date date_created, Date date_completed) {
+        int result = 0;
+        String sql = "insert into articles (id, title, pub_model, date_created, date_completed) " +
+                "values (?,?,?,?,?)";
+        String Info[] = str.split(";");
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setInt(1, Integer.parseInt(Info[0]));
+            preparedStatement.setString(2, Info[1]);
+            preparedStatement.setString(3, Info[2]);
+            preparedStatement.setDate(4, date_created);
+            preparedStatement.setDate(5, date_completed);
+            //System.out.println(preparedStatement.toString());
+
+            result = preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    @Override
     public int addOneMovie(String str) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into movies (movieid, title, country,year_released,runtime) " +
                 "values (?,?,?,?,?)";
@@ -65,38 +133,15 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
     @Override
-    public int addOneArticle(String str, Date date_created, Date date_completed) {
-        getConnection();
-        int result = 0;
-        String sql = "insert into articles (id, title, pub_model, date_created, date_completed) " +
-                "values (?,?,?,?,?)";
-        String Info[] = str.split(";");
-        try {
-            PreparedStatement preparedStatement = con.prepareStatement(sql);
-            preparedStatement.setInt(1, Integer.parseInt(Info[0]));
-            preparedStatement.setString(2, Info[1]);
-            preparedStatement.setString(3, Info[2]);
-            preparedStatement.setDate(4, date_created);
-            preparedStatement.setDate(5, date_completed);
-            //System.out.println(preparedStatement.toString());
 
-            result = preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            closeConnection();
-        }
-        return result;
-    }
 
     public int addArticleIds(String str) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into article_ids (article_id, type, id) " +
                 "values (?,?,?)";
@@ -113,14 +158,14 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
     @Override
     public int addReferences(String str) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into article_references (article_id, reference_id) " +
                 "values (?,?)";
@@ -136,14 +181,14 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
     @Override
     public int addAuthor(String str,Boolean isCollectiveName) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into authors (last_name, fore_name, initials, collective_name) " +
                 "values (?,?,?,?)";
@@ -162,14 +207,14 @@ public class DatabaseManipulation implements DataManipulation {
             //e.printStackTrace();
             //重复插入会有报错，直接注释掉了
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
     @Override
     public int addGrants(String str) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into grants (grant_id, acronym, country, agency, article_id) " +
                 "values (?,?,?,?,?)";
@@ -188,58 +233,14 @@ public class DatabaseManipulation implements DataManipulation {
             //e.printStackTrace();
             //重复插入会有报错，直接注释掉了
         } finally {
-            closeConnection();
-        }
-        return result;
-    }
-    public int addJournalIssue(String str){
-        getConnection();
-        int result = 0;
-        String sql = "insert into journal_issues (journal_id, volume, issue) " +
-                "values (?,?,?)";
-        String Info[] = str.split(";");
-        try {
-            PreparedStatement preparedStatement = con.prepareStatement(sql);
-            preparedStatement.setString(1, Info[0]);
-            preparedStatement.setString(2, Info[1]);
-            preparedStatement.setString(3, Info[2]);
-            //System.out.println(preparedStatement.toString());
-            result = preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            //e.printStackTrace();
-            //重复插入会有报错，直接注释掉了
-        } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
-    public int addJournals(String str){
-        getConnection();
-        int result = 0;
-        String sql = "insert into journals (id, country, title, issn) " +
-                "values (?,?,?,?)";
-        String Info[] = str.split(";");
-        try {
-            PreparedStatement preparedStatement = con.prepareStatement(sql);
-            preparedStatement.setString(1, Info[0]);
-            preparedStatement.setString(2, Info[1]);
-            preparedStatement.setString(3, Info[2]);
-            preparedStatement.setString(4, Info[3]);
-            //System.out.println(preparedStatement.toString());
-            result = preparedStatement.executeUpdate();
 
-        } catch (SQLException e) {
-            //e.printStackTrace();
-            //重复插入会有报错，直接注释掉了
-        } finally {
-            closeConnection();
-        }
-        return result;
-    }
     public int addKeywords(String str){
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into keywords (article_id, keyword) " +
                 "values (?,?)";
@@ -254,12 +255,12 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
     public int addPublication_Types(String str){
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into publication_types (id, article_id, name) " +
                 "values (?,?,?)";
@@ -275,14 +276,14 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
     @Override
     public int addAffiliation(String str) {
-        getConnection();
+        //getConnection();
         int result = 0;
         String sql = "insert into affiliation (id, affiliation) " +
                 "values (?,?)";
@@ -297,14 +298,14 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return result;
     }
 
     @Override
     public String allContinentNames() {
-        getConnection();
+        //getConnection();
         StringBuilder sb = new StringBuilder();
         String sql = "select continent from countries group by continent";
         try {
@@ -316,7 +317,7 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
 
         return sb.toString();
@@ -324,7 +325,7 @@ public class DatabaseManipulation implements DataManipulation {
 
     @Override
     public String continentsWithCountryCount() {
-        getConnection();
+        //getConnection();
         StringBuilder sb = new StringBuilder();
         String sql = "select continent, count(*) countryNumber from countries group by continent;";
         try {
@@ -338,7 +339,7 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
 
         return sb.toString();
@@ -346,7 +347,7 @@ public class DatabaseManipulation implements DataManipulation {
 
     @Override
     public String FullInformationOfMoviesRuntime(int min, int max) {
-        getConnection();
+        //getConnection();
         StringBuilder sb = new StringBuilder();
         String sql = "select m.title,c.country_name country,c.continent ,m.runtime " +
                 "from movies m " +
@@ -367,7 +368,7 @@ public class DatabaseManipulation implements DataManipulation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection();
+            //closeConnection();
         }
         return sb.toString();
     }

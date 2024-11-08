@@ -13,7 +13,7 @@ import java.util.List;
 public class ReadJson {
     public static String line = null;
     public static void main(String[] args) {
-
+        long stime= System.currentTimeMillis();
         /*
         //用来测试author id
         String temp0 = "{\"id\":12265,\"title\":\"Size analysis of metered suspension pressurized aerosols with the Quantimet 720.\",\"pub_model\":\"Print\",\"date_created\":{\"year\":2019,\"month\":7,\"day\":10},\"date_completed\":{\"year\":1977,\"month\":2,\"day\":24},\"journal\":{\"id\":\"0376363\",\"country\":\"England\",\"issn\":\"0022-3573\",\"title\":\"The Journal of pharmacy and pharmacology\",\"journal_issue\":{\"volume\":\"28\",\"issue\":\"12\"}},\"author\":[{\"last_name\":\"Hallworth\",\"fore_name\":\"G W\",\"initials\":\"GW\",\"affiliation\":[\"Pharmaceutical Research Department, Allen and Hanburys Research Ltd., Ware, Herts, U.K.\"]},{\"last_name\":\"Hamilton\",\"fore_name\":\"R R\",\"initials\":\"RR\"}],\"publication_types\":[{\"id\":\"D016428\",\"name\":\"Journal Article\"}],\"article_ids\":[{\"ty\":\"pubmed\",\"id\":\"12265\"},{\"ty\":\"doi\",\"id\":\"10.1111/j.2042-7158.1976.tb04087.x\"}]}\n";
@@ -57,12 +57,13 @@ public class ReadJson {
                         }
                     }
                 }*/
-                add_Article(newArticle,dm);
+                //System.out.println(line);
+                dm.getConnection();
+                add_Article_Journal_JournalIssue(newArticle,dm);
                 add_Article_ids(newArticle,dm);
                 add_References(newArticle,dm);
                 add_Authors_and_Affiliation(newArticle,dm);
                 add_Grants(newArticle,dm);
-                addJournal_And_Issue(newArticle,dm);
                 addKeywords(newArticle,dm);
                 addPublication_types(newArticle,dm);
                 //assertEquals(newPerson.getAge(), 0); // 如果我们设置系列化为 false
@@ -71,8 +72,10 @@ public class ReadJson {
                 if (record%100==0){
                     System.out.println("current record is: "+record);
                 }
+                dm.closeConnection();
             }
-            System.out.println("finished"+",record is:"+record);
+            long ftime = System.currentTimeMillis();
+            System.out.println("finished"+",record is:"+record+"\n"+"Time Cost:"+((ftime-stime)/1000));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,27 +106,50 @@ public class ReadJson {
         }
 
     }
-    public static void  addJournal_And_Issue(Article article,DataManipulation dm){
+    public static void  add_Article_Journal_JournalIssue(Article article,DataManipulation dm){
+            //Article
+            int id = article.getId();
+            String articleTitle = article.getTitle();
+            String pubmodel = String.valueOf(article.getPub_model());
 
+            JDate Jdate_created = article.getDate_created();
+            String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
+            Date date_created_sql = transferToSqlDate(date_created_str);
+
+            JDate Jdate_completed = article.getDate_completed();
+            String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
+            Date date_completed_sql = transferToSqlDate(date_completed_str);
+            String str_Article = id+";"+articleTitle+";"+pubmodel;
+            //Journals
             Journal journal = article.getJournal();
             String journal_id = journal.getId();
-            //Journals
             //insert into journals (id, country, title, issn)
             String country = journal.getCountry();
             String title = journal.getTitle();
             String issn = journal.getIssn();
-            String journal_str = journal_id+";"+country+";"+title+";"+issn;
-            dm.addJournals(journal_str);
+            String journal_str = journal_id+";"+country+";"+title+";"+issn+" ";
+
             //JournalIssue
             //(journal_id, volume, issue)
             JournalIssue journalIssue = journal.getJournal_issue();
             String volume = journalIssue.getVolume();
             String issue = journalIssue.getIssue();
             String journalIssue_str = journal_id+";"+volume+";"+issue;
-            dm.addJournalIssue(journalIssue_str);
+            dm.addAll(str_Article,date_created_sql,date_completed_sql,journal_str,journalIssue_str);
+    }
+    public static void add_Article (Article article,DataManipulation dm){
+        int id = article.getId();
+        String title = article.getTitle();
+        String pubmodel = String.valueOf(article.getPub_model());
 
+        JDate Jdate_created = article.getDate_created();
+        String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
+        Date date_created_sql = transferToSqlDate(date_created_str);
 
-
+        JDate Jdate_completed = article.getDate_completed();
+        String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
+        Date date_completed_sql = transferToSqlDate(date_completed_str);
+        dm.addOneArticle(id+";"+title+";"+pubmodel,date_created_sql,date_completed_sql);
     }
     public static void  add_Grants(Article article,DataManipulation dm){
         int idOfArticle = article.getId();
@@ -195,20 +221,7 @@ public class ReadJson {
             dm.addArticleIds(str);
         }
     }
-    public static void add_Article (Article article,DataManipulation dm){
-        int id = article.getId();
-        String title = article.getTitle();
-        String pubmodel = String.valueOf(article.getPub_model());
 
-        JDate Jdate_created = article.getDate_created();
-        String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
-        Date date_created_sql = transferToSqlDate(date_created_str);
-
-        JDate Jdate_completed = article.getDate_completed();
-        String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
-        Date date_completed_sql = transferToSqlDate(date_completed_str);
-        dm.addOneArticle(id+";"+title+";"+pubmodel,date_created_sql,date_completed_sql);
-    }
     public static Date transferToSqlDate(String date){
         // 使用 SimpleDateFormat 将字符串解析为 java.util.Date 对象
         try {

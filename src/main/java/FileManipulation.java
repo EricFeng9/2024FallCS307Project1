@@ -182,6 +182,11 @@ public class FileManipulation implements DataManipulation {
         return 0;
     }
 
+    @Override
+    public void addAll(String addOneArticle_str, Date date_created, Date date_completed, String addJournals_str,String JournalIssue_str) {
+
+    }
+
     class FullInformation {
         int runTime;
         String information;
@@ -190,5 +195,15 @@ public class FileManipulation implements DataManipulation {
             this.runTime = runTime;
             this.information = information;
         }
+    }
+
+    @Override
+    public void getConnection() {
+
+    }
+
+    @Override
+    public void closeConnection() {
+
     }
 }

@@ -1,46 +1,47 @@
 {
-  "id": 1346,
-  "title": "[Past and present aspects of diarrheal disease in childhood. Clinical study and treatment (author's transl)].",
+  "id": 151,
+  "title": "[Basic phospholipase of Naja nigricollis venom].",
   "pub_model": "Print",
   "date_created": {
     "year": 2019,
-    "month": 8,
-    "day": 27
+    "month": 10,
+    "day": 21
   },
   "date_completed": {
     "year": 1976,
-    "month": 3,
-    "day": 20
+    "month": 2,
+    "day": 21
   },
-  "keywords": [
-    "Diarrhea",
-    "Diarrhea, Infantile--etiology",
-    "Diseases",
-    "Examinations And Diagnoses",
-    "Literature Review",
-    "Oral Rehydration",
-    "Treatment"
-  ],
   "journal": {
-    "id": "0365307",
-    "country": "Germany",
-    "issn": "0300-8126",
-    "title": "Infection",
+    "id": "7501107",
+    "country": "France",
+    "issn": "",
+    "title": "Comptes rendus hebdomadaires des seances de l'Academie des sciences. Serie D: Sciences naturelles",
     "journal_issue": {
-      "volume": "3",
-      "issue": "4"
+      "volume": "280",
+      "issue": "13"
     }
   },
   "author": [
     {
-      "last_name": "Guggenbichler",
-      "fore_name": "J P",
-      "initials": "JP"
+      "last_name": "Dumarey",
+      "fore_name": "C",
+      "initials": "C"
     },
     {
-      "last_name": "Stickler",
-      "fore_name": "G B",
-      "initials": "GB"
+      "last_name": "Sket",
+      "fore_name": "D",
+      "initials": "D"
+    },
+    {
+      "last_name": "Joseph",
+      "fore_name": "D",
+      "initials": "D"
+    },
+    {
+      "last_name": "Boquet",
+      "fore_name": "P",
+      "initials": "P"
     }
   ],
   "publication_types": [
@@ -56,11 +57,7 @@
   "article_ids": [
     {
       "ty": "pubmed",
-      "id": "1346"
-    },
-    {
-      "ty": "doi",
-      "id": "10.1007/BF01642765"
+      "id": "151"
     }
   ]
 }

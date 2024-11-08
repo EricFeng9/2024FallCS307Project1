@@ -15,8 +15,13 @@ public interface DataManipulation {
     public int addAuthor(String str,Boolean isCollectiveName);
     public int addGrants(String str);
     public int addJournalIssue(String str);
+
+
     public int addJournals(String str);
     public int addKeywords(String str);
     public int addPublication_Types(String str);
     public int addAffiliation(String str);
+    public void addAll(String addOneArticle_str, Date date_created, Date date_completed, String addJournals_str,String JournalIssue_str);
+    public void getConnection();
+    public void closeConnection();
 }
