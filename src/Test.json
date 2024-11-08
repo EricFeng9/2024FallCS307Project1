@@ -1,0 +1,66 @@
+{
+  "id": 1346,
+  "title": "[Past and present aspects of diarrheal disease in childhood. Clinical study and treatment (author's transl)].",
+  "pub_model": "Print",
+  "date_created": {
+    "year": 2019,
+    "month": 8,
+    "day": 27
+  },
+  "date_completed": {
+    "year": 1976,
+    "month": 3,
+    "day": 20
+  },
+  "keywords": [
+    "Diarrhea",
+    "Diarrhea, Infantile--etiology",
+    "Diseases",
+    "Examinations And Diagnoses",
+    "Literature Review",
+    "Oral Rehydration",
+    "Treatment"
+  ],
+  "journal": {
+    "id": "0365307",
+    "country": "Germany",
+    "issn": "0300-8126",
+    "title": "Infection",
+    "journal_issue": {
+      "volume": "3",
+      "issue": "4"
+    }
+  },
+  "author": [
+    {
+      "last_name": "Guggenbichler",
+      "fore_name": "J P",
+      "initials": "JP"
+    },
+    {
+      "last_name": "Stickler",
+      "fore_name": "G B",
+      "initials": "GB"
+    }
+  ],
+  "publication_types": [
+    {
+      "id": "D004740",
+      "name": "English Abstract"
+    },
+    {
+      "id": "D016428",
+      "name": "Journal Article"
+    }
+  ],
+  "article_ids": [
+    {
+      "ty": "pubmed",
+      "id": "1346"
+    },
+    {
+      "ty": "doi",
+      "id": "10.1007/BF01642765"
+    }
+  ]
+}
