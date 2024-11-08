@@ -6,7 +6,7 @@ public class DatabaseManipulation implements DataManipulation {
     private ResultSet resultSet;
 
     private String host = "localhost";
-    private String dbname = "project_db_withnoconstrain";
+    private String dbname = "project_db";
     private String user = "postgres";
     private String pwd = "Lekge66811616";
     private String port = "5432";
@@ -108,7 +108,8 @@ public class DatabaseManipulation implements DataManipulation {
 
             result = preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            //todo 检查报错
         }
         return result;
     }

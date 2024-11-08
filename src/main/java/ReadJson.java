@@ -10,67 +10,50 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class ReadJson {
     public static String line = null;
     public static void main(String[] args) {
         long stime= System.currentTimeMillis();
-        /*
-        //用来测试author id
-        String temp0 = "{\"id\":12265,\"title\":\"Size analysis of metered suspension pressurized aerosols with the Quantimet 720.\",\"pub_model\":\"Print\",\"date_created\":{\"year\":2019,\"month\":7,\"day\":10},\"date_completed\":{\"year\":1977,\"month\":2,\"day\":24},\"journal\":{\"id\":\"0376363\",\"country\":\"England\",\"issn\":\"0022-3573\",\"title\":\"The Journal of pharmacy and pharmacology\",\"journal_issue\":{\"volume\":\"28\",\"issue\":\"12\"}},\"author\":[{\"last_name\":\"Hallworth\",\"fore_name\":\"G W\",\"initials\":\"GW\",\"affiliation\":[\"Pharmaceutical Research Department, Allen and Hanburys Research Ltd., Ware, Herts, U.K.\"]},{\"last_name\":\"Hamilton\",\"fore_name\":\"R R\",\"initials\":\"RR\"}],\"publication_types\":[{\"id\":\"D016428\",\"name\":\"Journal Article\"}],\"article_ids\":[{\"ty\":\"pubmed\",\"id\":\"12265\"},{\"ty\":\"doi\",\"id\":\"10.1111/j.2042-7158.1976.tb04087.x\"}]}\n";
-        String temp1 ="{\"id\":17090,\"title\":\"A comprehensive treatment approach to chronic low back pain.\",\"pub_model\":\"Print\",\"date_created\":{\"year\":2021,\"month\":1,\"day\":11},\"date_completed\":{\"year\":1977,\"month\":7,\"day\":29},\"journal\":{\"id\":\"7508686\",\"country\":\"United States\",\"issn\":\"0304-3959\",\"title\":\"Pain\",\"journal_issue\":{\"volume\":\"2\",\"issue\":\"3\"}},\"author\":[{\"last_name\":\"Cairns\",\"fore_name\":\"Douglas\",\"initials\":\"D\",\"affiliation\":[\"Spine Center, Rancho Los Amigos Hospital, 7601 East Imperial Highway, Downey, Calif. 90242 U.S.A.\"]},{\"last_name\":\"Thomas\",\"fore_name\":\"Lynn\",\"initials\":\"L\"},{\"last_name\":\"Mooney\",\"fore_name\":\"Vert\",\"initials\":\"V\"},{\"last_name\":\"Pace\",\"fore_name\":\"Blair J\",\"initials\":\"BJ\"}],\"publication_types\":[{\"id\":\"D016428\",\"name\":\"Journal Article\"}],\"article_ids\":[{\"ty\":\"pubmed\",\"id\":\"17090\"},{\"ty\":\"doi\",\"id\":\"10.1016/0304-3959(76)90007-5\"},{\"ty\":\"pii\",\"id\":\"00006396-197609000-00007\"}]}\n";
-        String temp2 ="{\"id\":17601,\"title\":\"Subunit structure of chloroplast photosystem I reaction center.\",\"pub_model\":\"Print\",\"date_created\":{\"year\":2021,\"month\":2,\"day\":12},\"date_completed\":{\"year\":1977,\"month\":8,\"day\":25},\"journal\":{\"id\":\"2985121R\",\"country\":\"United States\",\"issn\":\"0021-9258\",\"title\":\"The Journal of biological chemistry\",\"journal_issue\":{\"volume\":\"252\",\"issue\":\"13\"}},\"author\":[{\"last_name\":\"Bengis\",\"fore_name\":\"C\",\"initials\":\"C\",\"affiliation\":[\"Department of Biology, Technion-Israel Institute of Technology, Haifa, Israel.\"]},{\"last_name\":\"Nelson\",\"fore_name\":\"N\",\"initials\":\"N\"}],\"publication_types\":[{\"id\":\"D016428\",\"name\":\"Journal Article\"},{\"id\":\"D013485\",\"name\":\"Research Support, Non-U.S. Gov't\"}],\"article_ids\":[{\"ty\":\"pubmed\",\"id\":\"17601\"},{\"ty\":\"pii\",\"id\":\"S0021-9258(17)40199-2\"}]}\n";
-
-        Article article0 = JSON.parseObject(temp0,Article.class);
-        Article article1 = JSON.parseObject(temp1,Article.class);
-        Article article2 = JSON.parseObject(temp2,Article.class);
-        DataManipulation dm1 = new DataFactory().createDataManipulation(args[0]);
-        add_Authors_and_Affiliation(article0,dm1);
-        add_Authors_and_Affiliation(article1,dm1);
-        add_Authors_and_Affiliation(article2,dm1);
-
-       */
-        /*
-        //references 检测无法插入的问题
-        String temp = "{\"id\":115,\"title\":\"Proceedings: Response of identified ventromedial hypothalamic nucleus neurons to putative neurotransmitters applied by microiontophoresis.\",\"pub_model\":\"Print\",\"date_created\":{\"year\":2018,\"month\":11,\"day\":13},\"date_completed\":{\"year\":1976,\"month\":3,\"day\":1},\"journal\":{\"id\":\"7502536\",\"country\":\"England\",\"issn\":\"0007-1188\",\"title\":\"British journal of pharmacology\",\"journal_issue\":{\"volume\":\"55\",\"issue\":\"2\"}},\"author\":[{\"last_name\":\"Renaud\",\"fore_name\":\"L P\",\"initials\":\"LP\"},{\"last_name\":\"Kelly\",\"fore_name\":\"J S\",\"initials\":\"JS\"}],\"publication_types\":[{\"id\":\"D016428\",\"name\":\"Journal Article\"}],\"references\":[\"1139315\",\"803854\",\"806808\"],\"article_ids\":[{\"ty\":\"pubmed\",\"id\":\"115\"},{\"ty\":\"pmc\",\"id\":\"PMC1666801\"}]}\n";
-        DataManipulation dm1 = new DataFactory().createDataManipulation(args[0]);
-        Article article = JSON.parseObject(temp,Article.class);
-        add_Article_ids(article,dm1);
-        add_References(article,dm1);*/
         String path = "pubmed24n.ndjson";
-        /*try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             int record = 0;
             DataManipulation dm = new DataFactory().createDataManipulation(args[0]);
+            dm.getConnection();
             while ((line = br.readLine()) != null) {
                 // 这里可以使用JSON库如fastjson或Jackson来解析jsonContent
                 Article newArticle = JSON.parseObject(line,Article.class);
-                dm.getConnection();
 
-                add_References(newArticle,dm);
+                Thread_add_Atc_Jnl_JnlIs thread_add_Atc_Jnl_JnlIs =  new Thread_add_Atc_Jnl_JnlIs(dm,newArticle,"thread1",path);
+                thread_add_Atc_Jnl_JnlIs.start();
+
+                Thread_add_Article_ids thread_add_article_ids = new Thread_add_Article_ids(dm,newArticle,"thread2",path);
+                thread_add_article_ids.start();
+                // Wait for thread_add_Atc_Jnl_JnlIs to finish
+
+                /*add_References(newArticle,dm);
                 add_Authors_and_Affiliation(newArticle,dm);
                 add_Grants(newArticle,dm);
                 addKeywords(newArticle,dm);
-                addPublication_types(newArticle,dm);
-                //assertEquals(newPerson.getAge(), 0); // 如果我们设置系列化为 false
-                //assertEquals(newPerson.getFullName(), listOfPersons.get(0).getFullName());
+                addPublication_types(newArticle,dm);*/
+
                 record++;
-                if (record%100==0){
+                if (record%10000==0){
                     System.out.println("current record is: "+record);
                 }
-                dm.closeConnection();
+
             }
+            dm.closeConnection();
             long ftime = System.currentTimeMillis();
             System.out.println("finished"+",record is:"+record+"\n"+"Time Cost:"+((ftime-stime)/1000));
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
 
         //多线程导入
-        Thread_add_Atc_Jnl_JnlIs thread_add_Atc_Jnl_JnlIs =  new Thread_add_Atc_Jnl_JnlIs("thread1",path);
-        thread_add_Atc_Jnl_JnlIs.start();
-
-        Thread_add_Article_ids thread_add_article_ids = new Thread_add_Article_ids("thread2",path);
-        thread_add_article_ids.start();
+        //Thread_add_Article_ids thread_add_article_ids = new Thread_add_Article_ids("thread2",path);
+        //thread_add_article_ids.start();
         //todo 按上面的格式补充完整即可
     }
 
@@ -166,36 +149,32 @@ public class ReadJson {
 }
 class Thread_add_Atc_Jnl_JnlIs extends Thread{
     private String threadName;
+    private DataManipulation dm;
+    private Article article;
     private Thread t ;
     private String Path;
-    Thread_add_Atc_Jnl_JnlIs(String threadName,String Path){
+    Thread_add_Atc_Jnl_JnlIs(DataManipulation dm,Article article,String threadName,String Path){
+        this.dm = dm;
+        this.article = article;
         this.Path = Path;
         this.threadName = threadName;
-        System.out.println("Creating "+ threadName);
+        //System.out.println("Creating "+ threadName);
     }
 
     public void start(){
-        System.out.println("Starting "+threadName);
+        //System.out.println("Starting "+threadName);
         if (t==null){
             t = new Thread(this,threadName);
             t.start();
         }//在Thread类中， public void start() 使该线程开始执行；Java 虚拟机调用该线程的 run 方法。
     }
     public void run(){
+        //dm.getConnection();
         String line;
-        System.out.println("Running "+ threadName);
-        try (BufferedReader br = new BufferedReader(new FileReader(Path))){
-            DataManipulation dm = new DataFactory().createDataManipulation("Database");
-            while ((line = br.readLine()) != null){
-                dm.getConnection();
-                Article newArticle = JSON.parseObject(line,Article.class);
-                add_Article_Journal_JournalIssue(newArticle,dm);
-            }
-            dm.closeConnection();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Thread " +  threadName + " exiting.");
+        //System.out.println("Running "+ threadName);
+        add_Article_Journal_JournalIssue(article,dm);
+        //System.out.println("Thread " +  threadName + " exiting.");
+        //dm.closeConnection();
     }
 
     public void  add_Article_Journal_JournalIssue(Article article,DataManipulation dm){
@@ -228,6 +207,7 @@ class Thread_add_Atc_Jnl_JnlIs extends Thread{
         String issue = journalIssue.getIssue();
         String journalIssue_str = journal_id+";"+volume+";"+issue;
         dm.addAll(str_Article,date_created_sql,date_completed_sql,journal_str,journalIssue_str);
+
     }
     public Date transferToSqlDate(String date){
         // 使用 SimpleDateFormat 将字符串解析为 java.util.Date 对象
@@ -246,42 +226,31 @@ class Thread_add_Atc_Jnl_JnlIs extends Thread{
 }
 class  Thread_add_Article_ids extends Thread{
     private String threadName;
+    private DataManipulation dm;
+    private Article article;
     private Thread t ;
     private String Path;
-    Thread_add_Article_ids(String threadName,String Path){
+    Thread_add_Article_ids(DataManipulation dm,Article article,String threadName,String Path){
+        this.dm = dm;
+        this.article = article;
         this.Path = Path;
         this.threadName = threadName;
-        System.out.println("Creating "+ threadName);
+        //System.out.println("Creating "+ threadName);
     }
     public void start(){
-        System.out.println("Starting "+threadName);
+        //System.out.println("Starting "+threadName);
         if (t==null){
             t = new Thread(this,threadName);
             t.start();
         }//在Thread类中， public void start() 使该线程开始执行；Java 虚拟机调用该线程的 run 方法。
     }
     public void run(){
-        //先等article跑一秒
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
+        //dm.getConnection();
         String line;
-        System.out.println("Running "+ threadName);
-        try (BufferedReader br = new BufferedReader(new FileReader(Path))){
-            DataManipulation dm = new DataFactory().createDataManipulation("Database");
-            while ((line = br.readLine()) != null){
-                dm.getConnection();
-                Article newArticle = JSON.parseObject(line,Article.class);
-                add_Article_ids(newArticle,dm);
-            }
-            dm.closeConnection();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Thread " +  threadName + " exiting.");
+        //System.out.println("Running "+ threadName);
+        add_Article_ids(article,dm);
+        //System.out.println("Thread " +  threadName + " exiting.");
+        //dm.closeConnection();
     }
     public static void  add_Article_ids(Article article,DataManipulation dm){
         int idOfArticle = article.getId();
