@@ -2,6 +2,7 @@
 
 import com.alibaba.fastjson2.JSON;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,31 +37,15 @@ public class ReadJson {
         Article article = JSON.parseObject(temp,Article.class);
         add_Article_ids(article,dm1);
         add_References(article,dm1);*/
-
-
-
         String path = "pubmed24n.ndjson";
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+        /*try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             int record = 0;
             DataManipulation dm = new DataFactory().createDataManipulation(args[0]);
             while ((line = br.readLine()) != null) {
                 // 这里可以使用JSON库如fastjson或Jackson来解析jsonContent
                 Article newArticle = JSON.parseObject(line,Article.class);
-                /*
-                //测试add_Authors_and_Affiliation(newArticle,dm);方法
-                List<Author> authorList = newArticle.getAuthor();
-                if (authorList!=null){
-                    for (int i = 0; i < authorList.size(); i++) {
-                        if (authorList.get(i).getAffiliation()!=null){
-                            add_Authors_and_Affiliation(newArticle,dm);
-                            System.out.println(line);
-                        }
-                    }
-                }*/
-                //System.out.println(line);
                 dm.getConnection();
-                add_Article_Journal_JournalIssue(newArticle,dm);
-                add_Article_ids(newArticle,dm);
+
                 add_References(newArticle,dm);
                 add_Authors_and_Affiliation(newArticle,dm);
                 add_Grants(newArticle,dm);
@@ -78,8 +63,17 @@ public class ReadJson {
             System.out.println("finished"+",record is:"+record+"\n"+"Time Cost:"+((ftime-stime)/1000));
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+
+        //多线程导入
+        Thread_add_Atc_Jnl_JnlIs thread_add_Atc_Jnl_JnlIs =  new Thread_add_Atc_Jnl_JnlIs("thread1",path);
+        thread_add_Atc_Jnl_JnlIs.start();
+
+        Thread_add_Article_ids thread_add_article_ids = new Thread_add_Article_ids("thread2",path);
+        thread_add_article_ids.start();
+        //todo 按上面的格式补充完整即可
     }
+
     public static void addPublication_types(Article article,DataManipulation dm){
         //insert into publication_types (id, article_id, name)
         int idOfArticle = article.getId();
@@ -106,51 +100,7 @@ public class ReadJson {
         }
 
     }
-    public static void  add_Article_Journal_JournalIssue(Article article,DataManipulation dm){
-            //Article
-            int id = article.getId();
-            String articleTitle = article.getTitle();
-            String pubmodel = String.valueOf(article.getPub_model());
 
-            JDate Jdate_created = article.getDate_created();
-            String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
-            Date date_created_sql = transferToSqlDate(date_created_str);
-
-            JDate Jdate_completed = article.getDate_completed();
-            String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
-            Date date_completed_sql = transferToSqlDate(date_completed_str);
-            String str_Article = id+";"+articleTitle+";"+pubmodel;
-            //Journals
-            Journal journal = article.getJournal();
-            String journal_id = journal.getId();
-            //insert into journals (id, country, title, issn)
-            String country = journal.getCountry();
-            String title = journal.getTitle();
-            String issn = journal.getIssn();
-            String journal_str = journal_id+";"+country+";"+title+";"+issn+" ";
-
-            //JournalIssue
-            //(journal_id, volume, issue)
-            JournalIssue journalIssue = journal.getJournal_issue();
-            String volume = journalIssue.getVolume();
-            String issue = journalIssue.getIssue();
-            String journalIssue_str = journal_id+";"+volume+";"+issue;
-            dm.addAll(str_Article,date_created_sql,date_completed_sql,journal_str,journalIssue_str);
-    }
-    public static void add_Article (Article article,DataManipulation dm){
-        int id = article.getId();
-        String title = article.getTitle();
-        String pubmodel = String.valueOf(article.getPub_model());
-
-        JDate Jdate_created = article.getDate_created();
-        String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
-        Date date_created_sql = transferToSqlDate(date_created_str);
-
-        JDate Jdate_completed = article.getDate_completed();
-        String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
-        Date date_completed_sql = transferToSqlDate(date_completed_str);
-        dm.addOneArticle(id+";"+title+";"+pubmodel,date_created_sql,date_completed_sql);
-    }
     public static void  add_Grants(Article article,DataManipulation dm){
         int idOfArticle = article.getId();
         List<Grant> grantList = article.getGrant();
@@ -210,19 +160,76 @@ public class ReadJson {
             }
         }
     }
-    public static void  add_Article_ids(Article article,DataManipulation dm){
-        int idOfArticle = article.getId();
-        List<Ariticle_ids> ariticle_ids = article.getArticle_ids();
-        for (int i = 0; i < ariticle_ids.size(); i++) {
-            Ariticle_ids temp_article_ids = ariticle_ids.get(i);
-            String type = temp_article_ids.getTy();
-            String id = temp_article_ids.getId();
-            String str = idOfArticle +";"+type+";"+id;
-            dm.addArticleIds(str);
-        }
+
+
+
+}
+class Thread_add_Atc_Jnl_JnlIs extends Thread{
+    private String threadName;
+    private Thread t ;
+    private String Path;
+    Thread_add_Atc_Jnl_JnlIs(String threadName,String Path){
+        this.Path = Path;
+        this.threadName = threadName;
+        System.out.println("Creating "+ threadName);
     }
 
-    public static Date transferToSqlDate(String date){
+    public void start(){
+        System.out.println("Starting "+threadName);
+        if (t==null){
+            t = new Thread(this,threadName);
+            t.start();
+        }//在Thread类中， public void start() 使该线程开始执行；Java 虚拟机调用该线程的 run 方法。
+    }
+    public void run(){
+        String line;
+        System.out.println("Running "+ threadName);
+        try (BufferedReader br = new BufferedReader(new FileReader(Path))){
+            DataManipulation dm = new DataFactory().createDataManipulation("Database");
+            while ((line = br.readLine()) != null){
+                dm.getConnection();
+                Article newArticle = JSON.parseObject(line,Article.class);
+                add_Article_Journal_JournalIssue(newArticle,dm);
+            }
+            dm.closeConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Thread " +  threadName + " exiting.");
+    }
+
+    public void  add_Article_Journal_JournalIssue(Article article,DataManipulation dm){
+        //Article
+        int id = article.getId();
+        String articleTitle = article.getTitle();
+        String pubmodel = String.valueOf(article.getPub_model());
+
+        JDate Jdate_created = article.getDate_created();
+        String date_created_str = Jdate_created.getYear()+"-"+Jdate_created.getMonth()+"-"+Jdate_created.getDay();
+        Date date_created_sql = transferToSqlDate(date_created_str);
+
+        JDate Jdate_completed = article.getDate_completed();
+        String date_completed_str = Jdate_completed.getYear()+"-"+Jdate_completed.getMonth()+"-"+Jdate_completed.getDay();
+        Date date_completed_sql = transferToSqlDate(date_completed_str);
+        String str_Article = id+";"+articleTitle+";"+pubmodel;
+        //Journals
+        Journal journal = article.getJournal();
+        String journal_id = journal.getId();
+        //insert into journals (id, country, title, issn)
+        String country = journal.getCountry();
+        String title = journal.getTitle();
+        String issn = journal.getIssn();
+        String journal_str = journal_id+";"+country+";"+title+";"+issn+" ";
+
+        //JournalIssue
+        //(journal_id, volume, issue)
+        JournalIssue journalIssue = journal.getJournal_issue();
+        String volume = journalIssue.getVolume();
+        String issue = journalIssue.getIssue();
+        String journalIssue_str = journal_id+";"+volume+";"+issue;
+        dm.addAll(str_Article,date_created_sql,date_completed_sql,journal_str,journalIssue_str);
+    }
+    public Date transferToSqlDate(String date){
         // 使用 SimpleDateFormat 将字符串解析为 java.util.Date 对象
         try {
             // 使用 SimpleDateFormat 将字符串解析为 java.util.Date 对象
@@ -235,5 +242,56 @@ public class ReadJson {
             e.printStackTrace();
         }
         return null;
+    }
+}
+class  Thread_add_Article_ids extends Thread{
+    private String threadName;
+    private Thread t ;
+    private String Path;
+    Thread_add_Article_ids(String threadName,String Path){
+        this.Path = Path;
+        this.threadName = threadName;
+        System.out.println("Creating "+ threadName);
+    }
+    public void start(){
+        System.out.println("Starting "+threadName);
+        if (t==null){
+            t = new Thread(this,threadName);
+            t.start();
+        }//在Thread类中， public void start() 使该线程开始执行；Java 虚拟机调用该线程的 run 方法。
+    }
+    public void run(){
+        //先等article跑一秒
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        String line;
+        System.out.println("Running "+ threadName);
+        try (BufferedReader br = new BufferedReader(new FileReader(Path))){
+            DataManipulation dm = new DataFactory().createDataManipulation("Database");
+            while ((line = br.readLine()) != null){
+                dm.getConnection();
+                Article newArticle = JSON.parseObject(line,Article.class);
+                add_Article_ids(newArticle,dm);
+            }
+            dm.closeConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Thread " +  threadName + " exiting.");
+    }
+    public static void  add_Article_ids(Article article,DataManipulation dm){
+        int idOfArticle = article.getId();
+        List<Ariticle_ids> ariticle_ids = article.getArticle_ids();
+        for (int i = 0; i < ariticle_ids.size(); i++) {
+            Ariticle_ids temp_article_ids = ariticle_ids.get(i);
+            String type = temp_article_ids.getTy();
+            String id = temp_article_ids.getId();
+            String str = idOfArticle +";"+type+";"+id;
+            dm.addArticleIds(str);
+        }
     }
 }
